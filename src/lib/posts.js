@@ -1,49 +1,36 @@
-import fs from "fs";
-import path from "path";
-import matter from "gray-matter";
 import { remark } from "remark";
 import html from "remark-html";
+import { supabasePublic } from "@/lib/supabasePublic";
 
-const postsDirectory = path.join(process.cwd(), "posts");
+export async function getSortedPostsData() {
+  const { data, error } = await supabasePublic
+    .from("posts")
+    .select("slug, title, summary, created_at")
+    .order("created_at", { ascending: false });
 
-export function getSortedPostsData() {
-  const fileNames = fs.readdirSync(postsDirectory).filter((name) =>
-    name.endsWith(".md")
-  );
+  if (error) throw error;
 
-  const allPostsData = fileNames.map((fileName) => {
-    const slug = fileName.replace(/\.md$/, "");
-    const fullPath = path.join(postsDirectory, fileName);
-    const fileContents = fs.readFileSync(fullPath, "utf8");
-    const { data } = matter(fileContents);
-
-    return {
-      slug,
-      ...data,
-    };
-  });
-
-  return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1));
-}
-
-export function getAllPostSlugs() {
-  const fileNames = fs.readdirSync(postsDirectory).filter((name) =>
-    name.endsWith(".md")
-  );
-  return fileNames.map((fileName) => fileName.replace(/\.md$/, ""));
+  return data.map((post) => ({
+    ...post,
+    date: post.created_at.slice(0, 10),
+  }));
 }
 
 export async function getPostData(slug) {
-  const fullPath = path.join(postsDirectory, `${slug}.md`);
-  const fileContents = fs.readFileSync(fullPath, "utf8");
-  const { data, content } = matter(fileContents);
+  const { data: post, error } = await supabasePublic
+    .from("posts")
+    .select("slug, title, summary, content, created_at")
+    .eq("slug", slug)
+    .maybeSingle();
 
-  const processedContent = await remark().use(html).process(content);
-  const contentHtml = processedContent.toString();
+  if (error) throw error;
+  if (!post) return null;
+
+  const processedContent = await remark().use(html).process(post.content);
 
   return {
-    slug,
-    contentHtml,
-    ...data,
+    ...post,
+    date: post.created_at.slice(0, 10),
+    contentHtml: processedContent.toString(),
   };
 }

@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { getSortedPostsData } from "@/lib/posts";
 
-export default function Home() {
-  const posts = getSortedPostsData();
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const posts = await getSortedPostsData();
 
   return (
     <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-black">

@@ -1,19 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAllPostSlugs, getPostData } from "@/lib/posts";
+import { getPostData } from "@/lib/posts";
 
-export function generateStaticParams() {
-  return getAllPostSlugs().map((slug) => ({ slug }));
-}
+export const dynamic = "force-dynamic";
 
 export default async function Post({ params }) {
   const { slug } = await params;
+  const post = await getPostData(decodeURIComponent(slug));
 
-  if (!getAllPostSlugs().includes(slug)) {
+  if (!post) {
     notFound();
   }
-
-  const post = await getPostData(slug);
 
   return (
     <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-black">
