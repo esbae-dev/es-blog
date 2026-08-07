@@ -1,16 +1,21 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPostData } from "@/lib/posts";
+import { getCommentsForPost } from "@/lib/comments";
+import CommentSection from "./CommentSection";
 
 export const dynamic = "force-dynamic";
 
 export default async function Post({ params }) {
-  const { slug } = await params;
-  const post = await getPostData(decodeURIComponent(slug));
+  const { slug: rawSlug } = await params;
+  const slug = decodeURIComponent(rawSlug);
+  const post = await getPostData(slug);
 
   if (!post) {
     notFound();
   }
+
+  const comments = await getCommentsForPost(slug);
 
   return (
     <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-black">
@@ -31,6 +36,7 @@ export default async function Post({ params }) {
           className="prose prose-sm sm:prose-base dark:prose-invert max-w-none"
           dangerouslySetInnerHTML={{ __html: post.contentHtml }}
         />
+        <CommentSection slug={slug} initialComments={comments} />
       </main>
     </div>
   );
