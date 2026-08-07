@@ -6,6 +6,7 @@ export function middleware(request) {
   }
 
   const isLoggedIn =
+    !!process.env.ADMIN_PASSWORD &&
     request.cookies.get("admin_auth")?.value === process.env.ADMIN_PASSWORD;
 
   if (!isLoggedIn) {
