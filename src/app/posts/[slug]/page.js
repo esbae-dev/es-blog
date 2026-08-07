@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getPostData } from "@/lib/posts";
 import { getCommentsForPost } from "@/lib/comments";
 import CommentSection from "./CommentSection";
+import LikeButton from "./LikeButton";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +37,9 @@ export default async function Post({ params }) {
           className="prose prose-sm sm:prose-base dark:prose-invert max-w-none"
           dangerouslySetInnerHTML={{ __html: post.contentHtml }}
         />
+        <div className="mt-8">
+          <LikeButton slug={slug} initialCount={post.like_count} />
+        </div>
         <CommentSection slug={slug} initialComments={comments} />
       </main>
     </div>

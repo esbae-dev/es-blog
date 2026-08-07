@@ -19,7 +19,7 @@ export async function getSortedPostsData() {
 export async function getPostData(slug) {
   const { data: post, error } = await supabasePublic
     .from("posts")
-    .select("slug, title, summary, content, created_at")
+    .select("slug, title, summary, content, created_at, like_count")
     .eq("slug", slug)
     .maybeSingle();
 
